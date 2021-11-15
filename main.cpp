@@ -176,6 +176,7 @@ int main(int argc, char const *argv[])
 		cin >> finished_num;
 		if (finished_num == 0)
 		{
+			cerr << -1 << endl;
 			continue;
 		}
 		else if (finished_num == -1)

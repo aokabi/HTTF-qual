@@ -129,7 +129,7 @@
 				}
 				const line = lines[i].split(' ');
 				for (let j = 0; j < line.length; j++) {
-					if (line[j] !== '') {
+					if (line[j] !== '' && line[j] !== '-1') {
 						const node = cy.$('#' + line[j]);
 						node.style("background-color", "#666");
 						node.style("width", "50px");
