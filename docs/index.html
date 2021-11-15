@@ -10,7 +10,15 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>
 	<script src="./cytoscape-dagre.js"></script>
 	<script type="text/javascript">
-		const assignMap = {};
+		let cy;
+		let timer;
+		function nonBlockingFunc(func) {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					func();
+				});
+			});
+		}
 		function getNodes() {
 			const input = document.getElementById("input").value;
 			const lines = input.split('\n');
@@ -43,73 +51,77 @@
 			console.log(list);
 			return [n, list];
 		}
-		let cy;
 		function init() {
-			const nodeInfo = getNodes();
-			const n = nodeInfo[0];
-			const dependencyList = nodeInfo[1];
-			const nodes = [];
-			for (let i = 0; i < n; i++) {
-				nodes.push({
-					// group: 'nodes',
-					data: {
-						id: i // 0-indexed
-					}
-				});
-			}
-			// cy.add(nodes);
-			console.log(dependencyList);
-			// cy.add(dependencyList.map(l => ({ ...l })));
-
-
-			cy = cytoscape({
-
-				container: document.getElementById('cy'), // container to render in
-				boxSelectionEnabled: false,
-				autounselectify: true,
-				zoom: 0.09,
-				pan: { x: -1500, y: 200 },
-				layout: {
-					name: 'dagre',
-					ranker: 'longest-path',
-					rankSep: 500,
-					fit: false,
-				},
-				elements: {
-					nodes: nodes,
-					edges: dependencyList// list of graph elements to start with
-				},
-
-				style: [ // the stylesheet for the graph
-					{
-						selector: 'node',
-						style: {
-							'background-color': 'red',
-							'label': 'data(id)',
-							'width': '150px',
-							'height': '150px'
+			document.getElementById("status").innerText = "status: initializing";
+			clearInterval(timer);
+			nonBlockingFunc(() => {
+				const nodeInfo = getNodes();
+				const n = nodeInfo[0];
+				const dependencyList = nodeInfo[1];
+				const nodes = [];
+				for (let i = 0; i < n; i++) {
+					nodes.push({
+						// group: 'nodes',
+						data: {
+							id: i // 0-indexed
 						}
+					});
+				}
+				// cy.add(nodes);
+				console.log(dependencyList);
+				// cy.add(dependencyList.map(l => ({ ...l })));
+
+				cy = cytoscape({
+
+					container: document.getElementById('cy'), // container to render in
+					boxSelectionEnabled: false,
+					autounselectify: true,
+					zoom: 0.09,
+					pan: { x: -1500, y: 200 },
+					layout: {
+						name: 'dagre',
+						ranker: 'longest-path',
+						rankSep: 500,
+						fit: false,
+					},
+					elements: {
+						nodes: nodes,
+						edges: dependencyList// list of graph elements to start with
 					},
 
-					{
-						selector: 'edge',
-						style: {
-							'width': 3,
-							'line-color': '#ccc',
-							'target-arrow-color': '#ccc',
-							'target-arrow-shape': 'triangle',
-							'curve-style': 'bezier'
+					style: [ // the stylesheet for the graph
+						{
+							selector: 'node',
+							style: {
+								'background-color': 'red',
+								'label': 'data(id)',
+								'width': '150px',
+								'height': '150px'
+							}
+						},
+
+						{
+							selector: 'edge',
+							style: {
+								'width': 3,
+								'line-color': '#ccc',
+								'target-arrow-color': '#ccc',
+								'target-arrow-shape': 'triangle',
+								'curve-style': 'bezier'
+							}
 						}
-					}
-				],
+					],
+				});
+				cy.fit();
+				document.getElementById("status").innerText = "status: initialized";
 			});
-			cy.fit();
+			console.log("hoge");
 		}
 		function animate1() {
 			const lines = document.getElementById("output").value.split('\n');
 			console.log(lines);
 			let i = 0;
-			const timer = setInterval(() => {
+			timer = setInterval(() => {
 				// get nodes
 				if (i >= lines.length) {
 					clearInterval(timer);
@@ -142,6 +154,7 @@
 			</label>
 			<button id="init" onclick="init()">initialize</button>
 			<button id="animate" onclick="animate1()">animation</button>
+			<div id="status">status: none</div>
 		</div>
 		<div class="nine columns">
 			<div id="cy" style="width: 100%; height: 100vh;"></div>
